@@ -1,0 +1,511 @@
+[
+  {
+    "name": "source.py",
+    "path": "source.py",
+    "content": {
+      "structured": {
+        "description": "A transformer model using PyTorch, and provides two implementations for training the model: one using CPU only (train_cpu()) and another using IPU-accelerated training with PyTorch (train_ipu()). The train() function returns the trained loss tensor. The code sets up a sequential neural network architecture consisting of an embedding layer, absolute positional encoding, layer normalization, and multiple residual blocks with attention and feedforward networks inside each block. It also defines a new method called \"new_method\" in the ExtendedModel class for additional functionality not present in the base Model class.",
+        "items": [
+          {
+            "id": "b0873081-f2bf-eaa3-7a44-d412fef6ab32",
+            "ancestors": [],
+            "description": "Is a simple implementation of a dictionary-like object with additional methods for initialization and attribute access.",
+            "attributes": [
+              {
+                "name": "__dict__",
+                "type_name": "dict",
+                "description": "Used to store the instance's attributes, which are added during initialization using the `super()` method."
+              }
+            ],
+            "name": "Config",
+            "location": {
+              "start": 16,
+              "insert": 17,
+              "offset": " ",
+              "indent": 4,
+              "comment": null
+            },
+            "item_type": "class",
+            "length": 4,
+            "docLength": null
+          },
+          {
+            "id": "d775ca9a-3160-7fbe-7a42-44863f81c275",
+            "ancestors": [
+              "b0873081-f2bf-eaa3-7a44-d412fef6ab32"
+            ],
+            "description": "Initializes instances by calling the parent class's `__init__` and setting attributes to their default values before overwriting them with user-provided arguments.",
+            "params": [
+              {
+                "name": "*args",
+                "type_name": "Any",
+                "description": "List of positional arguments"
+              },
+              {
+                "name": "**kwargs",
+                "type_name": "Any",
+                "description": "Dictionary of keyword arguments"
+              }
+            ],
+            "returns": null,
+            "usage": {
+              "language": "python",
+              "code": "# create a new instance of Config class\nconfig = Config()\n\n# add key-value pairs to the config instance\nconfig['key1'] = 'value1'\nconfig['key2'] = 2\n\n# access the values using dict notation\nprint(config['key1'])  # prints \"value1\"\nprint(config['key2'])  # prints 2\n",
+              "description": ""
+            },
+            "name": "__init__",
+            "location": {
+              "start": 17,
+              "insert": 18,
+              "offset": " ",
+              "indent": 8,
+              "comment": null
+            },
+            "item_type": "constructor",
+            "length": 3,
+            "docLength": null
+          },
+          {
+            "id": "06e58314-b618-37ba-2f4a-9fcbdaf3207a",
+            "ancestors": [],
+            "description": "Iterates over a dataset `DATA` and generates batches of fixed size by randomly selecting indices within a range, ensuring each batch contains at least one element from every sequence in the dataset.",
+            "params": [],
+            "yields": {
+              "type_name": "Tensor",
+              "description": "An iterable containing multiple tensors, where each tensor represents a batch of data from the original dataset."
+            },
+            "usage": {
+              "language": "python",
+              "code": "# Iterate over the batches of data\nfor batch in batches():\n    # Process the batch of data here\n    print(batch)\n",
+              "description": ""
+            },
+            "name": "batches",
+            "location": {
+              "start": 37,
+              "insert": 38,
+              "offset": " ",
+              "indent": 4,
+              "comment": null
+            },
+            "item_type": "function",
+            "length": 6,
+            "docLength": null
+          },
+          {
+            "id": "b3685bd2-e918-6f9a-1c42-09891746a8db",
+            "ancestors": [],
+            "description": "Defines a self-attention mechanism that computes attention weights and projects output to the final space. It takes a input tensor, applies linear transformations to compute q, k, v, pre-attention, and attention weights, and then projects the output to the final space using another linear transformation.",
+            "attributes": [
+              {
+                "name": "head_size",
+                "type_name": "float|int",
+                "description": "Used to determine the size of each attention head. It controls the number of linear layers within each attention head, which in turn affects the computational complexity of self-attention."
+              },
+              {
+                "name": "n_heads",
+                "type_name": "int",
+                "description": "7."
+              },
+              {
+                "name": "qkv",
+                "type_name": "nnLinear",
+                "description": "3D tensor with dimensions (hidden size x number of heads x head size). It computes the query, key, and value vectors used in the attention mechanism."
+              },
+              {
+                "name": "proj",
+                "type_name": "nnLinear",
+                "description": "Used to transform the output of the attention mechanism into the original input space."
+              },
+              {
+                "name": "out_scale",
+                "type_name": "float",
+                "description": "1.0 for fully scaled attention or a scaling factor computed as (sequence length / math.e)**0.5 otherwise."
+              }
+            ],
+            "name": "Attention",
+            "location": {
+              "start": 45,
+              "insert": 48,
+              "offset": " ",
+              "indent": 4,
+              "comment": null
+            },
+            "item_type": "class",
+            "length": 31,
+            "docLength": null
+          },
+          {
+            "id": "0c5457c6-d54a-9e9c-ff4a-45e340aff38e",
+            "ancestors": [
+              "b3685bd2-e918-6f9a-1c42-09891746a8db"
+            ],
+            "description": "Performs self-attention on input tensor `x` by rearranging its dimensions, scaling the query and key vectors, computing the attention weights, and applying softmax to obtain a weighted sum of the value vector. The output is then passed through a projection layer to transform it back to the original shape.",
+            "params": [
+              {
+                "name": "x",
+                "type_name": "Tensor",
+                "description": "Passed through an einops.rearrange operation to manipulate its shape before being processed by the QKV layer."
+              }
+            ],
+            "returns": {
+              "type_name": "Tensor",
+              "description": "A transformed version of the input tensor `x`."
+            },
+            "usage": {
+              "language": "python",
+              "code": "import torch\nfrom transformers import Attention\n\n# Initialize the model and the input tensor\nmodel = Attention(CONFIG)\nx = torch.randn((1, 2, CONFIG.hidden_size))\n\n# Forward pass\nout = model.forward(x)\n",
+              "description": "\nHere, `CONFIG` is a configuration object that contains the hyperparameters for the model, such as the number of heads and the hidden size. The input tensor `x` has shape `(1, 2, CONFIG.hidden_size)`, where each row represents a sequence of tokens in the input text. The output of the forward pass is a tensor with shape `(1, 2, CONFIG.hidden_size)`, where each row contains the attention weights for each token in the input sequence.\n\nIt's important to note that this is just a simple example and the actual usage of the `forward` method will depend on the specific use case and requirements of the user."
+            },
+            "name": "forward",
+            "location": {
+              "start": 48,
+              "insert": 49,
+              "offset": " ",
+              "indent": 8,
+              "comment": null
+            },
+            "item_type": "method",
+            "length": 13,
+            "docLength": null
+          },
+          {
+            "id": "ebf4ba00-280a-33b6-4b4a-6045ab7328fe",
+            "ancestors": [
+              "b3685bd2-e918-6f9a-1c42-09891746a8db"
+            ],
+            "description": "Sets up the necessary components for attention mechanism: head size, number of heads, linear layers for projection and scaling.",
+            "params": [],
+            "returns": null,
+            "usage": {
+              "language": "python",
+              "code": "CONFIG = {\n    \"head_size\": 16,\n    \"hidden_size\": 32,\n    \"sequence_length\": 50,\n    \"fully_scaled_attention\": True,\n}\n\nattention = Attention(CONFIG)\n",
+              "description": "\nThis code creates an instance of the `Attention` class with a configuration dictionary `CONFIG`. The `__init__` method is called when the `attention` object is created, and it initializes the model's parameters. The `forward` method can then be used to perform attention on input tensors.\n\nThe user can also access the model's parameters using the dot notation after creating an instance of the class:\n"
+            },
+            "name": "__init__",
+            "location": {
+              "start": 62,
+              "insert": 63,
+              "offset": " ",
+              "indent": 8,
+              "comment": null
+            },
+            "item_type": "constructor",
+            "length": 14,
+            "docLength": null
+          },
+          {
+            "id": "8d8b1dc4-f476-7a97-1d42-72a49cfec014",
+            "ancestors": [],
+            "description": "Is a neural network layer that consists of two sub-layers: an upsampling (or \"up\") layer and a downsampling layer. The up layer takes the input and maps it to a higher dimensional space using a linear transformation, while the down layer takes the output of the up layer and maps it back to the original space using another linear transformation.",
+            "attributes": [
+              {
+                "name": "up",
+                "type_name": "nnLinear",
+                "description": "Responsible for mapping the input to a higher dimensional space before passing it through another linear layer."
+              },
+              {
+                "name": "down",
+                "type_name": "nnLinear",
+                "description": "Used to transform the output of the upward pass through the network, which consists of a matrix multiplication between the input and weights of the layer."
+              }
+            ],
+            "name": "FFN",
+            "location": {
+              "start": 77,
+              "insert": 78,
+              "offset": " ",
+              "indent": 4,
+              "comment": null
+            },
+            "item_type": "class",
+            "length": 8,
+            "docLength": null
+          },
+          {
+            "id": "38506b69-12c8-af95-ba40-6b42cbe1c115",
+            "ancestors": [
+              "8d8b1dc4-f476-7a97-1d42-72a49cfec014"
+            ],
+            "description": "Defines two linear layers: `up` and `down`. The `up` layer maps the input to a larger vector space, while the `down` layer maps the output of the `up` layer back to the original input space.",
+            "params": [],
+            "returns": null,
+            "usage": {
+              "language": "python",
+              "code": "from transformers import FFN\n\n# Create an instance of the FFN class and set its hyperparameters\nffn = FFN(hidden_size=512, num_layers=4)\n\n# Initialize the weights of the model\nffn.init()\n\n# Use the model to make predictions on a dataset\npredictions = ffn(inputs)\n",
+              "description": ""
+            },
+            "name": "__init__",
+            "location": {
+              "start": 78,
+              "insert": 79,
+              "offset": " ",
+              "indent": 8,
+              "comment": null
+            },
+            "item_type": "constructor",
+            "length": 4,
+            "docLength": null
+          },
+          {
+            "id": "ebb82111-89c9-aab1-c347-7b55c593f02e",
+            "ancestors": [],
+            "description": "Takes a neural network module `body` and applies it to the input `x` after normalizing the input using layer normalization. The output is the sum of the original input and the modified output from the body module.",
+            "attributes": [
+              {
+                "name": "norm",
+                "type_name": "nnLayerNorm",
+                "description": "Used to apply layer normalization to the input tensor before passing it through the body module."
+              },
+              {
+                "name": "body",
+                "type_name": "nnModule",
+                "description": "A module that takes the output of the layer norm and adds it to the input of the original module."
+              }
+            ],
+            "name": "PreNormResidual",
+            "location": {
+              "start": 87,
+              "insert": 88,
+              "offset": " ",
+              "indent": 4,
+              "comment": null
+            },
+            "item_type": "class",
+            "length": 8,
+            "docLength": null
+          },
+          {
+            "id": "85218ed0-a93a-969b-8c46-af0c56178633",
+            "ancestors": [
+              "ebb82111-89c9-aab1-c347-7b55c593f02e"
+            ],
+            "description": "Initializes an instance of the class by defining a norm layer and assigning it to the `self.norm` attribute, followed by the assignment of a module (represented by the `body` parameter) to the `self.body` attribute.",
+            "params": [
+              {
+                "name": "body",
+                "type_name": "nn.Module",
+                "description": "Passed to the constructor as the second argument."
+              }
+            ],
+            "returns": null,
+            "usage": {
+              "language": "python",
+              "code": "from transformers import PreNormResidual, CONFIG\n\n# Create a new instance of the PreNormResidual class with a body argument\nmy_residual = PreNormResidual(body=nn.Linear(CONFIG.hidden_size, CONFIG.hidden_size))\n\n# Use the residual block on an input tensor\noutput = my_residual(torch.randn(1, CONFIG.hidden_size))\n",
+              "description": ""
+            },
+            "name": "__init__",
+            "location": {
+              "start": 88,
+              "insert": 89,
+              "offset": " ",
+              "indent": 8,
+              "comment": null
+            },
+            "item_type": "constructor",
+            "length": 4,
+            "docLength": null
+          },
+          {
+            "id": "e78d1d58-0e55-c9b2-5e4a-3e6d7e339e6d",
+            "ancestors": [],
+            "description": "Defines a neural network layer that adds an absolute positional encoding to the input sequence, using a learned weight vector.",
+            "attributes": [
+              {
+                "name": "weight",
+                "type_name": "Parameter|torchTensor",
+                "description": "Initialized with a random tensor of size (sequence length, hidden size)."
+              }
+            ],
+            "name": "AbsolutePositionalEncoding",
+            "location": {
+              "start": 97,
+              "insert": 98,
+              "offset": " ",
+              "indent": 4,
+              "comment": null
+            },
+            "item_type": "class",
+            "length": 9,
+            "docLength": null
+          },
+          {
+            "id": "c10fb68e-882f-09ac-9140-37b49eccdfe0",
+            "ancestors": [
+              "e78d1d58-0e55-c9b2-5e4a-3e6d7e339e6d"
+            ],
+            "description": "Initializes an instance by setting its weight parameter to a random value drawn from a standard normal distribution with expected value 0 and standard deviation 1, which enables the model to learn positional information in the input sequence.",
+            "params": [],
+            "returns": null,
+            "usage": {
+              "language": "python",
+              "code": "# Import the AbsolutePositionalEncoding class from the nn module in PyTorch\nfrom torch import nn\n\n# Create a new instance of the AbsolutePositionalEncoding class\npos_enc = nn.AbsolutePositionalEncoding(CONFIG)\n\n# Initialize the weights of the model\npos_enc.__init__()\n",
+              "description": ""
+            },
+            "name": "__init__",
+            "location": {
+              "start": 98,
+              "insert": 99,
+              "offset": " ",
+              "indent": 8,
+              "comment": null
+            },
+            "item_type": "constructor",
+            "length": 5,
+            "docLength": null
+          },
+          {
+            "id": "d1e4de3c-eb67-309f-4f44-f11a37994812",
+            "ancestors": [],
+            "description": "Defines a neural network architecture consisting of an embedding layer, absolute positional encoding, layer normalization, and multiple residual blocks with attention and feedforward networks.",
+            "attributes": [
+              {
+                "name": "model",
+                "type_name": "nnSequential",
+                "description": "Defined as a chain of nn layers, including embedding, absolute positional encoding, layer normalization, residual blocks with attention and FFN, and linear layer."
+              }
+            ],
+            "name": "Model",
+            "location": {
+              "start": 108,
+              "insert": 109,
+              "offset": " ",
+              "indent": 4,
+              "comment": null
+            },
+            "item_type": "class",
+            "length": 19,
+            "docLength": null
+          },
+          {
+            "id": "482c7dc9-4411-faa1-4747-e8f4912023f4",
+            "ancestors": [
+              "d1e4de3c-eb67-309f-4f44-f11a37994812"
+            ],
+            "description": "Initializes the model's architecture, consisting of an embedding layer, absolute positional encoding, layer normalization, multiple residual blocks with attention and feedforward networks, and finally a linear layer to produce the output.",
+            "params": [],
+            "returns": null,
+            "usage": {
+              "language": "python",
+              "code": "# Create an instance of the Model class and assign it to model_instance\nmodel_instance = Model()\n\n# Forward pass using the instance created above\noutput = model_instance(input_tensor)\n",
+              "description": ""
+            },
+            "name": "__init__",
+            "location": {
+              "start": 109,
+              "insert": 110,
+              "offset": " ",
+              "indent": 8,
+              "comment": null
+            },
+            "item_type": "constructor",
+            "length": 13,
+            "docLength": null
+          },
+          {
+            "id": "dbaadfc4-5b55-1586-2a4f-68d1a2be2337",
+            "ancestors": [
+              "d1e4de3c-eb67-309f-4f44-f11a37994812"
+            ],
+            "description": "Computes cross-entropy loss between the flattened output of the model for the input indices up to the second-to-last dimension and the remaining one-dimensional indices.",
+            "params": [
+              {
+                "name": "indices",
+                "type_name": "Tensor",
+                "description": "1D, representing a tensor of shape `(N, 2)`, where N is the batch size, containing the indices of the input samples to be classified."
+              }
+            ],
+            "returns": {
+              "type_name": "Tensor",
+              "description": "The output of the cross-entropy loss calculation between the model's prediction and the true values."
+            },
+            "usage": {
+              "language": "python",
+              "code": "import torch\nfrom transformers import Model\n\n# Initialize model and set input shape\nmodel = Model(256, hidden_size=10)\ninput_shape = (3, 100)\n\n# Prepare inputs\ninputs = torch.randint(1, 256, input_shape).unsqueeze(1)\n\n# Compute loss\nloss = model.forward(inputs)\n\n# Print loss\nprint(loss)\n",
+              "description": ""
+            },
+            "name": "forward",
+            "location": {
+              "start": 123,
+              "insert": 124,
+              "offset": " ",
+              "indent": 8,
+              "comment": null
+            },
+            "item_type": "method",
+            "length": 4,
+            "docLength": null
+          },
+          {
+            "id": "be2ba289-fe05-bbb6-334f-fc1c2fcb0ed0",
+            "ancestors": [],
+            "description": "Extends a base model by adding new methods `new_method()` and `forward()`, which multiply input values by 2, respectively, before passing them to the parent model's `forward()` method.",
+            "attributes": [],
+            "name": "ExtendedModel",
+            "location": {
+              "start": 129,
+              "insert": 130,
+              "offset": " ",
+              "indent": 4,
+              "comment": null
+            },
+            "item_type": "class",
+            "length": 7,
+            "docLength": null
+          },
+          {
+            "id": "bd941caf-968d-10b6-454d-63651437c8bd",
+            "ancestors": [],
+            "description": "Trains a machine learning model using the Adam optimizer and tensorboard to track loss values.",
+            "params": [],
+            "returns": {
+              "type_name": "Tensor",
+              "description": "4-dimensional, containing the average loss across all training batches."
+            },
+            "usage": {
+              "language": "python",
+              "code": "import torch\nfrom train_cpu import Model, CONFIG\n\n# Define model and optimizer parameters\nmodel = Model()\nopt = torch.optim.Adam(model.parameters(), lr=CONFIG.lr)\n\n# Load data batches\nbatches = ...\n\n# Train the model using the defined optimizer and loss function\nlosses = []\nfor batch in tqdm.tqdm(islice(batches(), CONFIG.steps), total=CONFIG.steps):\n    opt.zero_grad()\n    loss = model(batch)\n    loss.backward()\n    opt.step()\n    losses.append(float(loss))\n",
+              "description": ""
+            },
+            "name": "train_cpu",
+            "location": {
+              "start": 141,
+              "insert": 142,
+              "offset": " ",
+              "indent": 4,
+              "comment": null
+            },
+            "item_type": "function",
+            "length": 11,
+            "docLength": null
+          },
+          {
+            "id": "01ba56fe-1bbb-eb94-464c-4b615356eae8",
+            "ancestors": [],
+            "description": "Trains a PyTorch model using Adam optimizer and tqdm for progress bar. It returns a tensor containing the trained model's output after processing a sequence of input batches.",
+            "params": [],
+            "returns": {
+              "type_name": "Tensor",
+              "description": "A batch of the model's output for each training example in the given batches, evaluated using the Adam optimizer and the specified learning rate."
+            },
+            "usage": {
+              "language": "python",
+              "code": "from poptorch import Model, options, trainingModel, Adam\nimport torch.optim as optim\n\n# Initialize the model and options\nmodel = Model()\noptions = poptorch.Options()\nopt = optim.Adam(model.parameters(), lr=0.001)\n\n# Train the model on a dataset\nfor batch in tqdm.tqdm(islice(batches(), 50), total=50):\n    opt.zero_grad()\n    output = model(batch)\n    loss = output.loss()\n    loss.backward()\n    opt.step()\n",
+              "description": ""
+            },
+            "name": "train_ipu",
+            "location": {
+              "start": 154,
+              "insert": 155,
+              "offset": " ",
+              "indent": 4,
+              "comment": null
+            },
+            "item_type": "function",
+            "length": 17,
+            "docLength": null
+          }
+        ]
+      }
+    }
+  }
+]
